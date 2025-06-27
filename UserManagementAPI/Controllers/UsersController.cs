@@ -22,5 +22,16 @@ namespace UserManagementAPI.Controllers
             return Ok(_users); // 返回 200 OK 和使用者列表，並序列化為 JSON 格式作為回應主體。
         }
 
+        // 20250627 mod by jimmy for API新增使用者功能
+        [HttpPost]
+        public ActionResult<User> AddUser([FromBody] User newUser)
+        {
+            newUser.Id = _users.Any() ? _users.Max(u => u.Id) + 1 : 1; // ID是在後端自動生成的，以前端找到的最大的那個ID+1產生
+
+            _users.Add(newUser); // 將前端創建的新使用者添加到列表中
+
+            return CreatedAtAction(nameof(GetUsers), new { id = newUser.Id }, newUser); // 作為回應主體返回的新創建使用者物件，並生成 Location URL。
+        }
+
     }
 }
