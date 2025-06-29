@@ -69,6 +69,24 @@ namespace UserManagementAPI.Controllers
             return Ok(user); // 返回 200 OK 和找到的使用者資料
         }
 
+        // 20250629 mod by jimmy for API刪除使用者功能
+        // DELETE: api/Users/{id}
+        [HttpDelete("{id}")] // {id} 表示這是路由參數
+
+        public IActionResult DeleteUser(int id)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _users.Remove(user);
+
+            return NoContent(); // RESTful API 中 DELETE 操作成功後的推薦回傳方式
+        }
+
 
     }
 }
