@@ -27,17 +27,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 //var fullConnectionString = $"{connectionString}Pwd={mysqlPassword};";
 builder.Services.AddDbContext<UserManagementDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)) // 接收DB資料與檢測 MySQL Server 版本
 );
 // ****** 添加資料庫連接和 DbContext 註冊 End ******
 
 // ******* 添加 CORS 策略 Start *******
+// Angular 前端 (http://localhost:4200) 與 ASP.NET Core 後端 API (https://localhost:7278)
+// 他們位於不同的埠號，所以會被視為不同的「來源」(Origin)。所以需要依賴CORS來控制與轉換
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200")
+            builder.WithOrigins("http://localhost:4200") // 前端的URL
                    // 允許所有標頭和所有 HTTP 方法 (GET, POST, PUT, DELETE 等)
                    .AllowAnyHeader()
                    .AllowAnyMethod();

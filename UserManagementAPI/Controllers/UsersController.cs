@@ -19,7 +19,7 @@ namespace UserManagementAPI.Controllers
         //    new User { Id = 2, Name = "陳美麗", Email = "meili@example.com" },
         //    new User { Id = 3, Name = "張大衛", Email = "david@example.com" }
         //};
-        private readonly UserManagementDbContext _context; // 注入 DbContext
+        private readonly UserManagementDbContext _context; // 注入 DbContext，資料庫的項目
 
         // 構造函數，透過依賴注入接收 DbContext 實例
         public UsersController(UserManagementDbContext context)
@@ -29,10 +29,10 @@ namespace UserManagementAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers() // 允許返回各種 IActionResult (如 Ok(), NotFound())。
         {
             // 從資料庫非同步獲取所有使用者
-            return Ok(await _context.Users.ToListAsync());
+            return Ok(await _context.Users.ToListAsync()); // 生成 SQL 語句來查詢 Users 表格中的所有數據 ( SELECT )
         }
 
         // GET: api/Users/{id}
@@ -55,15 +55,15 @@ namespace UserManagementAPI.Controllers
         public async Task<ActionResult<User>> AddUser([FromBody] User newUser)
         {
             // 自動增長 ID 由資料庫處理，不需要手動設定
-            _context.Users.Add(newUser); // 將新使用者添加到 DbSet 中
-            await _context.SaveChangesAsync(); // 將更改保存到資料庫
+            _context.Users.Add(newUser); // 將新使用者添加到 DbSet ( _context ) 中
+            await _context.SaveChangesAsync(); // 將更改保存到資料庫，在此可能是INSERT操作
 
             // 返回 201 Created 狀態碼，並包含新使用者的資料和其資源的 URI
             return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser);
         }
 
         // PUT: api/Users/{id}
-        [HttpPut("{id}")]
+        [HttpPut("{id}")] // 根據前端選到的id將特定使用者做編輯
         public async Task<IActionResult> UpdateUser(int id, [FromBody] User updatedUser)
         {
             if (id != updatedUser.Id)
@@ -72,7 +72,7 @@ namespace UserManagementAPI.Controllers
             }
 
             // 通知 EF Core 這個實體是處於修改狀態
-            _context.Entry(updatedUser).State = EntityState.Modified;
+            _context.Entry(updatedUser).State = EntityState.Modified; // 讓 SaveChangesAsync() 知道要生成 UPDATE 語句。
 
             try
             {
@@ -91,7 +91,7 @@ namespace UserManagementAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return NoContent(); // HTTP 204 No Content
         }
 
         // DELETE: api/Users/{id}
@@ -108,7 +108,7 @@ namespace UserManagementAPI.Controllers
             _context.Users.Remove(user); // 從 DbSet 中移除
             await _context.SaveChangesAsync(); // 將更改保存到資料庫
 
-            return NoContent();
+            return NoContent(); // HTTP 204 No Content
         }
 
         // 輔助方法：檢查使用者是否存在（用於 UpdateUser 錯誤處理）
