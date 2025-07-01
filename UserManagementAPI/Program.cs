@@ -1,3 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using UserManagementAPI.Data;
+
+// 20250630 mod by jimmy for 使用者資料串聯資料庫
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +12,24 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// 20250630 mod by jimmy for 使用者資料串聯資料庫
+// ****** 添加資料庫連接和 DbContext 註冊 Start ******
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD");
+
+//// 檢查密碼是否為空，如果為空可能會有問題
+//if (string.IsNullOrEmpty(mysqlPassword))
+//{
+//    // 暫時允許它為空，但實際運行可能導致連接失敗
+//    Console.WriteLine("警告：未找到環境變數 MYSQL_ROOT_PASSWORD。資料庫連接可能失敗。");
+//}
+
+//var fullConnectionString = $"{connectionString}Pwd={mysqlPassword};";
+builder.Services.AddDbContext<UserManagementDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+);
+// ****** 添加資料庫連接和 DbContext 註冊 End ******
 
 // ******* 添加 CORS 策略 Start *******
 builder.Services.AddCors(options =>
