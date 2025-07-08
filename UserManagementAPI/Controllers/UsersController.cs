@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using UserManagementAPI.Models; // 引入我們剛剛建立的 User 模型
-
 // 20250630 mod by jimmy for 使用者資料串聯資料庫
 using Microsoft.EntityFrameworkCore; // 引入 EF Core 相關功能
 using UserManagementAPI.Data; // 引入 DbContext 命名空間
+using UserManagementAPI.Models; // 引入我們剛剛建立的 User 模型
+
+// 20250703 mod by jimmy for JWT驗證
+using Microsoft.AspNetCore.Authorization;
 
 namespace UserManagementAPI.Controllers
 {
     [Route("api/[controller]")] // 定義路由前綴
     [ApiController] // 標記為 API 控制器
+
+    // 20250703 mod by jimmy for JWT驗證
+    [Authorize] // 整個控制器都需要驗證
     public class UsersController : ControllerBase
     {
         // 20250630 mod by jimmy for 使用者資料串聯資料庫

@@ -1,8 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using UserManagementAPI.Data;
-
+using Microsoft.IdentityModel.Tokens;
 // 20250630 mod by jimmy for 使用者資料串聯資料庫
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using System.Text;
+using UserManagementAPI.Data;
+
+// 20250703 mod by jimmy for JWT驗證
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +51,25 @@ builder.Services.AddCors(options =>
 });
 // ******* 添加 CORS 策略 End *******
 
+// 20250703 mod by jimmy for JWT驗證
+// 配置 JWT 驗證
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true, // 驗證發行者
+            ValidateAudience = true, // 驗證接收者
+            ValidateLifetime = true, // 驗證過期時間
+            ValidateIssuerSigningKey = true, // 驗證簽章金鑰
+            ValidIssuer = builder.Configuration["Jwt:Issuer"], // 從配置中讀取發行者
+            ValidAudience = builder.Configuration["Jwt:Audience"], // 從配置中讀取接收者
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // 從配置中讀取金鑰
+        };
+    });
+
+builder.Services.AddAuthorization(); // 啟用授權服務
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -61,6 +84,9 @@ app.UseCors("AllowSpecificOrigin");
 // ******* 使用 CORS 中介層 End *******
 
 app.UseHttpsRedirection();
+
+// 20250703 mod by jimmy for JWT驗證
+app.UseAuthentication();
 
 app.UseAuthorization();
 
